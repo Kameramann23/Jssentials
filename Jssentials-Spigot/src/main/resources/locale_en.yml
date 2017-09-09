@@ -1,0 +1,5 @@
+no-permission: "&4Error: You do not have permission to do that."
+too-few-args: "&4Error: Not enough arguments specified."
+too-many-args: "&4Error: Too many arguments specified."
+no-player: "&4Error: There is no player online by that name."
+player-only: "&4Error: Only players can do that."

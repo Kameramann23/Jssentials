@@ -1,0 +1,3 @@
+language: en
+database: sqlite
+logout-gamemode: SURVIVAL

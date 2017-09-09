@@ -1,0 +1,6 @@
+name: Jssentials
+version: ${project.version}
+main: io.github.jagswag2014.Jssentials
+authors: [JagSwag2014]
+website: http://www.jagswag2014.me/
+softdepend: [PlaceHolderAPI]
