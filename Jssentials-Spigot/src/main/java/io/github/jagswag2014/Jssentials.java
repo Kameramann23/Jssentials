@@ -73,6 +73,18 @@ public final class Jssentials extends JavaPlugin {
      */
     private void setupCommands() {
         getCommand("afk").setExecutor(new AFKCommand(this));
+        getCommand("gamemode").setExecutor(new GAMEMODECommand(this));
+        getCommand("home").setExecutor(new HOMECommand(this));
+        getCommand("homes").setExecutor(new HOMESCommand(this));
+        getCommand("ignore").setExecutor(new IGNORECommand(this));
+        getCommand("ignores").setExecutor(new IGNORESCommand(this));
+        getCommand("motd").setExecutor(new MOTDCommand(this));
+        getCommand("msg").setExecutor(new MSGCommand(this));
+        getCommand("reply").setExecutor(new REPLYCommand(this));
+        getCommand("rules").setExecutor(new RULESCommand(this));
+        getCommand("socialspy").setExecutor(new SOCIALSPYCommand(this));
+        getCommand("sudo").setExecutor(new SUDOCommand(this));
+        getCommand("time").setExecutor(new TIMECommand(this));
         getCommand("tpaccept").setExecutor(new TPACCEPTCommand(this));
         getCommand("tpa").setExecutor(new TPACommand(this));
         getCommand("tpall").setExecutor(new TPALLCommand(this));
@@ -80,6 +92,9 @@ public final class Jssentials extends JavaPlugin {
         getCommand("tpdeny").setExecutor(new TPDENYCommand(this));
         getCommand("tphere").setExecutor(new TPHERECommand(this));
         getCommand("tptoggle").setExecutor(new TPTOGGLECommand(this));
+        getCommand("warp").setExecutor(new WARPCommand(this));
+        getCommand("warps").setExecutor(new WARPSCommand(this));
+        getCommand("weather").setExecutor(new WEATHERCommand(this));
     }
 
     /**
