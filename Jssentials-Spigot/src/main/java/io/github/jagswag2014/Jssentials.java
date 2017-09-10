@@ -11,15 +11,18 @@
 
 package io.github.jagswag2014;
 
+import io.github.jagswag2014.commands.*;
 import io.github.jagswag2014.configuration.SettingsManager;
 import io.github.jagswag2014.database.Database;
 import io.github.jagswag2014.database.MySQL;
 import io.github.jagswag2014.database.SQLite;
+import io.github.jagswag2014.database.Type;
 import io.github.jagswag2014.managers.PlayerManager;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 
 public final class Jssentials extends JavaPlugin {
@@ -55,14 +58,28 @@ public final class Jssentials extends JavaPlugin {
 
     @Override
     public void onDisable() {
-
+        if (getDb().getType().equals(Type.MYSQL)) {
+            MySQL mysql = (MySQL) db;
+            try {
+                mysql.getConnection().close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
      * Register all commands
      */
     private void setupCommands() {
-
+        getCommand("afk").setExecutor(new AFKCommand(this));
+        getCommand("tpaccept").setExecutor(new TPACCEPTCommand(this));
+        getCommand("tpa").setExecutor(new TPACommand(this));
+        getCommand("tpall").setExecutor(new TPALLCommand(this));
+        getCommand("tp").setExecutor(new TPCommand(this));
+        getCommand("tpdeny").setExecutor(new TPDENYCommand(this));
+        getCommand("tphere").setExecutor(new TPHERECommand(this));
+        getCommand("tptoggle").setExecutor(new TPTOGGLECommand(this));
     }
 
     /**
@@ -90,5 +107,14 @@ public final class Jssentials extends JavaPlugin {
     private void setupMetrics() {
         /*Metrics metrics = */
         new Metrics(this);
+    }
+
+    /**
+     * Returns the database
+     *
+     * @return database
+     */
+    public Database getDb() {
+        return db;
     }
 }
