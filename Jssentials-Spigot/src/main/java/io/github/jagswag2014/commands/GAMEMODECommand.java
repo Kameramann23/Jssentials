@@ -4,7 +4,7 @@ import io.github.jagswag2014.Jssentials;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class GAMEMODECommand extends CommandParent {
+public class GAMEMODECommand extends ZCommandParent {
 
     public GAMEMODECommand(Jssentials plugin) {
         super(plugin);

@@ -4,7 +4,7 @@ import io.github.jagswag2014.Jssentials;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class IGNORESCommand extends CommandParent {
+public class IGNORESCommand extends ZCommandParent {
 
     public IGNORESCommand(Jssentials plugin) {
         super(plugin);

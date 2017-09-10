@@ -4,7 +4,7 @@ import io.github.jagswag2014.Jssentials;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class TPHERECommand extends CommandParent {
+public class TPHERECommand extends ZCommandParent {
 
     public TPHERECommand(Jssentials plugin) {
         super(plugin);

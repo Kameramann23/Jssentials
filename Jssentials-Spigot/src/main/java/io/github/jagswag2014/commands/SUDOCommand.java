@@ -4,7 +4,7 @@ import io.github.jagswag2014.Jssentials;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class SUDOCommand extends CommandParent {
+public class SUDOCommand extends ZCommandParent {
 
     public SUDOCommand(Jssentials plugin) {
         super(plugin);

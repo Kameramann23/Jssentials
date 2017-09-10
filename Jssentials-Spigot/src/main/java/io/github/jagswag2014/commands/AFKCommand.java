@@ -15,7 +15,7 @@ import io.github.jagswag2014.Jssentials;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class AFKCommand extends CommandParent {
+public class AFKCommand extends ZCommandParent {
 
     public AFKCommand(Jssentials plugin) {
         super(plugin);

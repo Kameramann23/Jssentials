@@ -4,7 +4,7 @@ import io.github.jagswag2014.Jssentials;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class TPACommand extends CommandParent {
+public class TPACommand extends ZCommandParent {
 
     public TPACommand(Jssentials plugin) {
         super(plugin);

@@ -4,7 +4,7 @@ import io.github.jagswag2014.Jssentials;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class TPDENYCommand extends CommandParent {
+public class TPDENYCommand extends ZCommandParent {
 
     public TPDENYCommand(Jssentials plugin) {
         super(plugin);

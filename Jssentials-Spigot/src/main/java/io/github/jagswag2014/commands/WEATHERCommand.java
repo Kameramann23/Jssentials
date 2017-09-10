@@ -4,7 +4,7 @@ import io.github.jagswag2014.Jssentials;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class WEATHERCommand extends CommandParent {
+public class WEATHERCommand extends ZCommandParent {
 
     public WEATHERCommand(Jssentials plugin) {
         super(plugin);

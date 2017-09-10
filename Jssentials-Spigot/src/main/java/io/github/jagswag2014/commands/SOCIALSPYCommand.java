@@ -4,7 +4,7 @@ import io.github.jagswag2014.Jssentials;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class SOCIALSPYCommand extends CommandParent {
+public class SOCIALSPYCommand extends ZCommandParent {
 
     public SOCIALSPYCommand(Jssentials plugin) {
         super(plugin);

@@ -4,7 +4,7 @@ import io.github.jagswag2014.Jssentials;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class MSGCommand extends CommandParent {
+public class MSGCommand extends ZCommandParent {
 
     public MSGCommand(Jssentials plugin) {
         super(plugin);

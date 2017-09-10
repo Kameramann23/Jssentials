@@ -4,9 +4,9 @@ import io.github.jagswag2014.Jssentials;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class TPCommand extends ZCommandParent {
+public class ZUtilityCommands extends ZCommandParent {
 
-    public TPCommand(Jssentials plugin) {
+    public ZUtilityCommands(Jssentials plugin) {
         super(plugin);
     }
 

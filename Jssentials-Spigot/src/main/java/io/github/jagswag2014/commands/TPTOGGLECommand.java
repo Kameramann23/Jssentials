@@ -4,7 +4,7 @@ import io.github.jagswag2014.Jssentials;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class TPTOGGLECommand extends CommandParent {
+public class TPTOGGLECommand extends ZCommandParent {
 
     public TPTOGGLECommand(Jssentials plugin) {
         super(plugin);

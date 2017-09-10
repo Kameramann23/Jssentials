@@ -4,7 +4,7 @@ import io.github.jagswag2014.Jssentials;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class TIMECommand extends CommandParent {
+public class TIMECommand extends ZCommandParent {
 
     public TIMECommand(Jssentials plugin) {
         super(plugin);

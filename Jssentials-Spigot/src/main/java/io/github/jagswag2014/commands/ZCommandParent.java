@@ -15,12 +15,12 @@ import io.github.jagswag2014.Jssentials;
 import io.github.jagswag2014.configuration.SettingsManager;
 import org.bukkit.command.CommandExecutor;
 
-abstract class CommandParent implements CommandExecutor {
+abstract class ZCommandParent implements CommandExecutor {
 
     Jssentials plugin;
     SettingsManager settings;
 
-    CommandParent(Jssentials plugin) {
+    ZCommandParent(Jssentials plugin) {
         this.plugin = plugin;
         settings = SettingsManager.getInstance();
     }

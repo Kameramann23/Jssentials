@@ -4,7 +4,7 @@ import io.github.jagswag2014.Jssentials;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class REPLYCommand extends CommandParent {
+public class REPLYCommand extends ZCommandParent {
 
     public REPLYCommand(Jssentials plugin) {
         super(plugin);

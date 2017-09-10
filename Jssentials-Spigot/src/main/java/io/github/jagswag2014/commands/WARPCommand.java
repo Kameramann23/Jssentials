@@ -4,7 +4,7 @@ import io.github.jagswag2014.Jssentials;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class WARPCommand extends CommandParent {
+public class WARPCommand extends ZCommandParent {
 
     public WARPCommand(Jssentials plugin) {
         super(plugin);

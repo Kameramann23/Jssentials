@@ -4,7 +4,7 @@ import io.github.jagswag2014.Jssentials;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class HOMECommand extends CommandParent {
+public class HOMECommand extends ZCommandParent {
 
     public HOMECommand(Jssentials plugin) {
         super(plugin);

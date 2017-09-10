@@ -4,7 +4,7 @@ import io.github.jagswag2014.Jssentials;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class MOTDCommand extends CommandParent {
+public class MOTDCommand extends ZCommandParent {
 
     public MOTDCommand(Jssentials plugin) {
         super(plugin);

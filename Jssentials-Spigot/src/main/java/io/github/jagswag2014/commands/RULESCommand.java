@@ -4,7 +4,7 @@ import io.github.jagswag2014.Jssentials;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class RULESCommand extends CommandParent {
+public class RULESCommand extends ZCommandParent {
 
     public RULESCommand(Jssentials plugin) {
         super(plugin);
