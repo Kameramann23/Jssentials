@@ -12,18 +12,16 @@
 package io.github.jagswag2014.events;
 
 import io.github.jagswag2014.Jssentials;
-import org.bukkit.event.EventHandler;
+import io.github.jagswag2014.configuration.SettingsManager;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 
-public class PlayerJoin extends EventParent implements Listener {
+class ZEventParent implements Listener {
 
-    public PlayerJoin(Jssentials plugin) {
-        super(plugin);
-    }
+    Jssentials plugin;
+    SettingsManager settings;
 
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-
+    ZEventParent(Jssentials plugin) {
+        this.plugin = plugin;
+        settings = SettingsManager.getInstance();
     }
 }

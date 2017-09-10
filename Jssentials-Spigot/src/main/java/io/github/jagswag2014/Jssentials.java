@@ -17,9 +17,11 @@ import io.github.jagswag2014.database.Database;
 import io.github.jagswag2014.database.MySQL;
 import io.github.jagswag2014.database.SQLite;
 import io.github.jagswag2014.database.Type;
+import io.github.jagswag2014.events.JOINEvent;
 import io.github.jagswag2014.managers.PlayerManager;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
@@ -101,7 +103,8 @@ public final class Jssentials extends JavaPlugin {
      * Register all events
      */
     private void setupEvents() {
-
+        PluginManager pm = getServer().getPluginManager();
+        pm.registerEvents(new JOINEvent(this), this);
     }
 
     /**
