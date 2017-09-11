@@ -15,7 +15,7 @@ import io.github.jagswag2014.Jssentials;
 import io.github.jagswag2014.configuration.SettingsManager;
 import org.bukkit.event.Listener;
 
-class ZEventParent implements Listener {
+public class ZEventParent implements Listener {
 
     Jssentials plugin;
     SettingsManager settings;
