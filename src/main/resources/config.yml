@@ -1,3 +1,10 @@
 language: en
+
 database: sqlite
-logout-gamemode: SURVIVAL
+server_properties:
+  hostname: localhost
+  port: 3306
+  database: jssentials
+  username: root
+  password: password
+  table_prefix: jssentials_
