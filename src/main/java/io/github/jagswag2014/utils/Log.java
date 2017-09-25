@@ -12,14 +12,9 @@
 package io.github.jagswag2014.utils;
 
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 public class Log {
-
-    public static void LogMessage(String message, ConsoleCommandSender console) {
-        console.sendMessage(message);
-    }
 
     public static String ColorMessage(String input) {
         String output;

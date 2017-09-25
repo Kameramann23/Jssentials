@@ -19,6 +19,9 @@ import io.github.jagswag2014.configuration.SettingsManager;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class Database {
@@ -45,6 +48,17 @@ public class Database {
         props.setProperty("dataSource.databaseName", settings.getConfig().getString("server_properties.database"));
         props.put("dataSource.logWriter", new PrintWriter(System.out));
         hikari = new HikariDataSource(new HikariConfig(props));
+
+        try {
+            if (initialize()) {
+                plugin.getLogger().info(type + " selected, connected successfully.");
+            } else {
+                plugin.getLogger().severe("Database initialization error, please check your database credentials in config.yml");
+                plugin.getServer().getPluginManager().disablePlugin(plugin);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private String determineType(String type) {
@@ -74,5 +88,37 @@ public class Database {
 
     private DBType getType() {
         return type;
+    }
+
+    private boolean initialize() throws SQLException {
+        switch (type) {
+            case H2:
+                List<String> queries = new ArrayList<>();
+                queries.add("CREATE TABLE IF NOT EXISTS uuid_cache (uID INTEGER NOT NULL AUTO_INCREMENT UNIQUE PRIMARY KEY, mID UUID NOT NULL UNIQUE, uName VARCHAR(16) NOT NULL, uLastLogin TIMESTAMP NOT NULL);");
+                queries.add("CREATE TABLE IF NOT EXISTS user (uID INTEGER NOT NULL UNIQUE PRIMARY KEY, uHomes TEXT NULL, uLastLocation TEXT DEFAULT NULL, uIgnores TEXT DEFAULT NULL, uMessage BOOLEAN DEFAULT FALSE, uTeleport BOOLEAN DEFAULT FALSE);");
+                queries.add("CREATE TABLE IF NOT EXISTS flags (uSender INTEGER NOT NULL PRIMARY KEY, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                queries.add("CREATE TABLE IF NOT EXISTS freezes (uSender INTEGER NOT NULL PRIMARY KEY, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                queries.add("CREATE TABLE IF NOT EXISTS mutes (uSender INTEGER NOT NULL PRIMARY KEY, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
+                queries.add("CREATE TABLE IF NOT EXISTS kicks (uSender INTEGER NOT NULL PRIMARY KEY, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                queries.add("CREATE TABLE IF NOT EXISTS bans (uSender INTEGER NOT NULL PRIMARY KEY, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
+                queries.add("CREATE TABLE IF NOT EXISTS unbans (uSender INTEGER NOT NULL PRIMARY KEY, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+
+                Statement statement = getConnection().createStatement();
+                for (String query : queries) {
+                    statement.addBatch(query);
+                }
+                statement.executeBatch();
+                statement.close();
+                break;
+            case MYSQL:
+                break;
+            case MARIADB:
+                break;
+            case POSTGRESQL:
+                break;
+            default:
+                break;
+        }
+        return false;
     }
 }
