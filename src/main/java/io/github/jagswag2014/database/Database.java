@@ -135,6 +135,22 @@ public class Database {
             case POSTGRESQL:
                 break;
             default:
+                queries.add("CREATE TABLE IF NOT EXISTS " + tablePrefix + "uuid_cache (uID INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, mID VARCHAR(36) NOT NULL UNIQUE, uName VARCHAR(16) NOT NULL, uLastLogin TIMESTAMP NOT NULL);");
+                queries.add("CREATE TABLE IF NOT EXISTS " + tablePrefix + "user (uID INTEGER NOT NULL, uHomes TEXT NULL, uLastLocation TEXT DEFAULT NULL, uIgnores TEXT DEFAULT NULL, uMessage BOOLEAN DEFAULT FALSE, uTeleport BOOLEAN DEFAULT FALSE);");
+                queries.add("CREATE TABLE IF NOT EXISTS " + tablePrefix + "flags (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                queries.add("CREATE TABLE IF NOT EXISTS " + tablePrefix + "freezes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                queries.add("CREATE TABLE IF NOT EXISTS " + tablePrefix + "mutes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
+                queries.add("CREATE TABLE IF NOT EXISTS " + tablePrefix + "kicks (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                queries.add("CREATE TABLE IF NOT EXISTS " + tablePrefix + "bans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
+                queries.add("CREATE TABLE IF NOT EXISTS " + tablePrefix + "unbans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+
+                statement = getConnection().createStatement();
+                for (String query : queries) {
+                    statement.addBatch(query);
+                }
+                statement.executeBatch();
+                statement.close();
+                queries.clear();
                 break;
         }
         return false;
