@@ -18,6 +18,8 @@ import io.github.jagswag2014.configuration.SettingsManager;
 import io.github.jagswag2014.utils.PlayerManager;
 import org.bukkit.entity.Player;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.*;
 import java.util.ArrayList;
@@ -31,9 +33,28 @@ public class Database {
     private DBType type;
     private HikariDataSource hikari;
     private String tablePrefix = settings.getConfig().getString("server_properties.table_prefix");
+    private File dbFile;
 
+    /**
+     * Default constructor for creating Database
+     *
+     * @param plugin main plugin class instance
+     */
     public Database(Jssentials plugin) {
         this.plugin = plugin;
+        dbFile = new File(plugin.getDataFolder(), "jssentials.db");
+
+        if (!plugin.getDataFolder().exists())
+            plugin.getDataFolder().mkdir();
+
+        if (!dbFile.exists()) {
+            try {
+                dbFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         String type = determineType(settings.getConfig().getString("database"));
 
         Properties props = new Properties();
@@ -51,15 +72,11 @@ public class Database {
 
         hikari = new HikariDataSource(new HikariConfig(props));
 
-        try {
-            if (initialize()) {
-                plugin.getLogger().info(type + " selected, connected successfully.");
-            } else {
-                plugin.getLogger().severe("Database initialization error, please check your database credentials in config.yml");
-                plugin.getServer().getPluginManager().disablePlugin(plugin);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (initialize()) {
+            plugin.getLogger().info(type + " selected, connected successfully.");
+        } else {
+            plugin.getLogger().severe("Database initialization error, please check your database credentials in config.yml");
+            plugin.getServer().getPluginManager().disablePlugin(plugin);
         }
     }
 
@@ -78,7 +95,7 @@ public class Database {
             jdbcUrl = "jdbc:h2://";
             this.type = DBType.H2;
         } else {
-            jdbcUrl = "jdbc:sqlite:jssentials.db";
+            jdbcUrl = "jdbc:sqlite:" + dbFile.getAbsolutePath();
             this.type = DBType.SQLITE;
         }
         return jdbcUrl;
@@ -92,143 +109,154 @@ public class Database {
         return type;
     }
 
-    private boolean initialize() throws SQLException {
+    private boolean initialize() {
         List<String> queries = new ArrayList<>();
-        switch (type) {
-            case H2:
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "uuid_cache (uID IDENTITY PRIMARY KEY, mID UUID NOT NULL UNIQUE, uName VARCHAR(16) NOT NULL, uLastLogin TIMESTAMP NOT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "user (uID INTEGER NOT NULL, uHomes TEXT NULL, uLastLocation TEXT DEFAULT NULL, uIgnores TEXT DEFAULT NULL, uMessage BOOLEAN DEFAULT FALSE, uTeleport BOOLEAN DEFAULT FALSE);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "flags (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "freezes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "mutes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "kicks (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "bans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "unbans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+        try {
+            switch (type) {
+                case H2:
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "uuid_cache (uID IDENTITY PRIMARY KEY, mID UUID NOT NULL UNIQUE, uName VARCHAR(16) NOT NULL, uLastLogin TIMESTAMP NOT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "user (uID INTEGER NOT NULL, uHomes TEXT NULL, uLastLocation TEXT DEFAULT NULL, uIgnores TEXT DEFAULT NULL, uMessage BOOLEAN DEFAULT FALSE, uTeleport BOOLEAN DEFAULT FALSE);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "flags (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "freezes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "mutes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "kicks (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "bans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "unbans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
 
-                Statement statement = getConnection().createStatement();
-                for (String query : queries) {
-                    statement.addBatch(query);
-                }
-                statement.executeBatch();
-                statement.close();
-                queries.clear();
-                break;
-            case MYSQL:
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "uuid_cache (uID INTEGER AUTO_INCREMENT PRIMARY KEY UNIQUE, mID VARCHAR(36) NOT NULL UNIQUE, uName VARCHAR(16) NOT NULL, uLastLogin TIMESTAMP NOT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "user (uID INTEGER NOT NULL, uHomes TEXT NULL, uLastLocation TEXT DEFAULT NULL, uIgnores TEXT DEFAULT NULL, uMessage BOOLEAN DEFAULT FALSE, uTeleport BOOLEAN DEFAULT FALSE);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "flags (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "freezes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "mutes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "kicks (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "bans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "unbans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    Statement statement = getConnection().createStatement();
+                    for (String query : queries) {
+                        statement.addBatch(query);
+                    }
+                    statement.executeBatch();
+                    statement.close();
+                    queries.clear();
+                    return true;
+                case MYSQL:
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "uuid_cache (uID INTEGER AUTO_INCREMENT PRIMARY KEY UNIQUE, mID VARCHAR(36) NOT NULL UNIQUE, uName VARCHAR(16) NOT NULL, uLastLogin TIMESTAMP NOT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "user (uID INTEGER NOT NULL, uHomes TEXT NULL, uLastLocation TEXT DEFAULT NULL, uIgnores TEXT DEFAULT NULL, uMessage BOOLEAN DEFAULT FALSE, uTeleport BOOLEAN DEFAULT FALSE);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "flags (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "freezes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "mutes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "kicks (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "bans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "unbans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
 
-                statement = getConnection().createStatement();
-                for (String query : queries) {
-                    statement.addBatch(query);
-                }
-                statement.executeBatch();
-                statement.close();
-                queries.clear();
-                break;
-            case MARIADB:
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "uuid_cache (uID INTEGER AUTO_INCREMENT PRIMARY KEY UNIQUE, mID VARCHAR(36) NOT NULL UNIQUE, uName VARCHAR(16) NOT NULL, uLastLogin TIMESTAMP NOT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "user (uID INTEGER NOT NULL, uHomes TEXT NULL, uLastLocation TEXT DEFAULT NULL, uIgnores TEXT DEFAULT NULL, uMessage BOOLEAN DEFAULT FALSE, uTeleport BOOLEAN DEFAULT FALSE);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "flags (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "freezes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "mutes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "kicks (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "bans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "unbans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    statement = getConnection().createStatement();
+                    for (String query : queries) {
+                        statement.addBatch(query);
+                    }
+                    statement.executeBatch();
+                    statement.close();
+                    queries.clear();
+                    return true;
+                case MARIADB:
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "uuid_cache (uID INTEGER AUTO_INCREMENT PRIMARY KEY UNIQUE, mID VARCHAR(36) NOT NULL UNIQUE, uName VARCHAR(16) NOT NULL, uLastLogin TIMESTAMP NOT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "user (uID INTEGER NOT NULL, uHomes TEXT NULL, uLastLocation TEXT DEFAULT NULL, uIgnores TEXT DEFAULT NULL, uMessage BOOLEAN DEFAULT FALSE, uTeleport BOOLEAN DEFAULT FALSE);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "flags (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "freezes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "mutes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "kicks (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "bans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "unbans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
 
-                statement = getConnection().createStatement();
-                for (String query : queries) {
-                    statement.addBatch(query);
-                }
-                statement.executeBatch();
-                statement.close();
-                queries.clear();
-                break;
-            case POSTGRESQL:
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "uuid_cache (uID INTEGER SERIAL PRIMARY KEY UNIQUE, mID UUID NOT NULL UNIQUE, uName VARCHAR(16) NOT NULL, uLastLogin TIMESTAMP NOT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "user (uID INTEGER NOT NULL, uHomes TEXT NULL, uLastLocation TEXT DEFAULT NULL, uIgnores TEXT DEFAULT NULL, uMessage BOOLEAN DEFAULT FALSE, uTeleport BOOLEAN DEFAULT FALSE);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "flags (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "freezes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "mutes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "kicks (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "bans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "unbans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    statement = getConnection().createStatement();
+                    for (String query : queries) {
+                        statement.addBatch(query);
+                    }
+                    statement.executeBatch();
+                    statement.close();
+                    queries.clear();
+                    return true;
+                case POSTGRESQL:
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "uuid_cache (uID INTEGER SERIAL PRIMARY KEY UNIQUE, mID UUID NOT NULL UNIQUE, uName VARCHAR(16) NOT NULL, uLastLogin TIMESTAMP NOT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "user (uID INTEGER NOT NULL, uHomes TEXT NULL, uLastLocation TEXT DEFAULT NULL, uIgnores TEXT DEFAULT NULL, uMessage BOOLEAN DEFAULT FALSE, uTeleport BOOLEAN DEFAULT FALSE);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "flags (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "freezes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "mutes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "kicks (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "bans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "unbans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
 
-                statement = getConnection().createStatement();
-                for (String query : queries) {
-                    statement.addBatch(query);
-                }
-                statement.executeBatch();
-                statement.close();
-                queries.clear();
-                break;
-            default:
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "uuid_cache (uID INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, mID VARCHAR(36) NOT NULL UNIQUE, uName VARCHAR(16) NOT NULL, uLastLogin TIMESTAMP NOT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "user (uID INTEGER NOT NULL, uHomes TEXT NULL, uLastLocation TEXT DEFAULT NULL, uIgnores TEXT DEFAULT NULL, uMessage BOOLEAN DEFAULT FALSE, uTeleport BOOLEAN DEFAULT FALSE);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "flags (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "freezes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "mutes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "kicks (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "bans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
-                queries.add("CREATE TABLE IF NOT EXISTS " +
-                        tablePrefix + "unbans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    statement = getConnection().createStatement();
+                    for (String query : queries) {
+                        statement.addBatch(query);
+                    }
+                    statement.executeBatch();
+                    statement.close();
+                    queries.clear();
+                    return true;
+                default:
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "uuid_cache (uID INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, mID VARCHAR(36) NOT NULL UNIQUE, uName VARCHAR(16) NOT NULL, uLastLogin TIMESTAMP NOT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "user (uID INTEGER NOT NULL, uHomes TEXT NULL, uLastLocation TEXT DEFAULT NULL, uIgnores TEXT DEFAULT NULL, uMessage BOOLEAN DEFAULT FALSE, uTeleport BOOLEAN DEFAULT FALSE);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "flags (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "freezes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "mutes (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "kicks (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "bans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL, uExpiration TIMESTAMP DEFAULT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "unbans (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
 
-                statement = getConnection().createStatement();
-                for (String query : queries) {
-                    statement.addBatch(query);
-                }
-                statement.executeBatch();
-                statement.close();
-                queries.clear();
-                break;
+                    statement = getConnection().createStatement();
+                    for (String query : queries) {
+                        statement.addBatch(query);
+                    }
+                    statement.executeBatch();
+                    statement.close();
+                    queries.clear();
+                    return true;
+            }
+        } catch (SQLException e) {
+            if (settings.getConfig().getBoolean("debug"))
+                e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
+    /**
+     * Checks if the player's info already exists in the database
+     * @param player player info to check for
+     * @return true if it exists, false otherwise
+     * @throws SQLException {@link SQLException}.
+     */
     public boolean entryExists(Player player) throws SQLException {
         String sql;
         Statement statement = getConnection().createStatement();
@@ -245,6 +273,11 @@ public class Database {
         return rs.next();
     }
 
+    /**
+     * Adds a nonexisting user to the database
+     * @param player player to add to the database
+     * @throws SQLException {@link SQLException}.
+     */
     public void addUser(Player player) throws SQLException {
         String cacheSql;
         if (getType().equals(DBType.H2) || getType().equals(DBType.POSTGRESQL)) {
@@ -269,6 +302,12 @@ public class Database {
         statement.close();
     }
 
+    /**
+     * Returns the specified player's unique server ID
+     * @param player player to get ID for
+     * @return player's unique server ID
+     * @throws SQLException {@link SQLException}.
+     */
     public int getId(Player player) throws SQLException {
         String sql;
         Statement statement = getConnection().createStatement();
@@ -285,6 +324,13 @@ public class Database {
         return rs.getInt("uID");
     }
 
+    /**
+     * Creates a PlayerManager based on existing info in the database (returning players)
+     * @param player player to retrieve info for
+     * @param exists only pulls information if the entries exist
+     * @return newly created PlayerManager
+     * @throws SQLException {@link SQLException}.
+     */
     public PlayerManager createPlayerManager(Player player, boolean exists) throws SQLException {
         PlayerManager playerManager = null;
         if (getType().equals(DBType.POSTGRESQL) || getType().equals(DBType.H2)) {
@@ -295,6 +341,11 @@ public class Database {
         return playerManager;
     }
 
+    /**
+     * Saves the PlayerManager info to the database when the player quits
+     * @param playerManager PlayerManager to save
+     * @return true if successful, false otherwise
+     */
     public boolean saveEntry(PlayerManager playerManager) {
         return false;
     }

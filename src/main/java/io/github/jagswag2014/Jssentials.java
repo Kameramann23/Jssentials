@@ -12,6 +12,7 @@
 package io.github.jagswag2014;
 
 import io.github.jagswag2014.configuration.SettingsManager;
+import io.github.jagswag2014.database.Database;
 import io.github.jagswag2014.utils.PlayerManager;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.entity.Player;
@@ -29,9 +30,12 @@ public final class Jssentials extends JavaPlugin {
 
     public HashMap<Player, PlayerManager> playerManagerHashMap;
 
+    private Database db;
+
     @Override
     public void onEnable() {
         playerManagerHashMap = new HashMap<>();
+
         getLogger().info("Registering commands...");
         setupCommands();
 
@@ -69,7 +73,7 @@ public final class Jssentials extends JavaPlugin {
      * Register database
      */
     private void setupDatabase() {
-
+        db = new Database(this);
     }
 
     /**
@@ -78,5 +82,24 @@ public final class Jssentials extends JavaPlugin {
     private void setupMetrics() {
         /*Metrics metrics = */
         new Metrics(this);
+    }
+
+    /**
+     * Returns active database
+     *
+     * @return database
+     */
+    public Database getDb() {
+        return db;
+    }
+
+    /**
+     * Returns the PlayerManager of the specified player
+     *
+     * @param player to retrieve PlayerManager for
+     * @return player's PlayerManager
+     */
+    public PlayerManager getPlayerManager(Player player) {
+        return playerManagerHashMap.getOrDefault(player, null);
     }
 }
