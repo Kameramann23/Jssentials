@@ -12,9 +12,13 @@
 package io.github.jagswag2014;
 
 import io.github.jagswag2014.configuration.SettingsManager;
+import io.github.jagswag2014.utils.PlayerManager;
 import org.bstats.bukkit.Metrics;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.HashMap;
 
 public final class Jssentials extends JavaPlugin {
 
@@ -23,9 +27,11 @@ public final class Jssentials extends JavaPlugin {
      */
     private final SettingsManager settings = SettingsManager.getInstance();
 
+    public HashMap<Player, PlayerManager> playerManagerHashMap;
+
     @Override
     public void onEnable() {
-
+        playerManagerHashMap = new HashMap<>();
         getLogger().info("Registering commands...");
         setupCommands();
 

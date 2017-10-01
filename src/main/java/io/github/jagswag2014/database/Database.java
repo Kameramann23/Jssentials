@@ -230,8 +230,18 @@ public class Database {
     }
 
     public boolean entryExists(Player player) throws SQLException {
+        String sql;
         Statement statement = getConnection().createStatement();
-        ResultSet rs = statement.executeQuery("SELECT 1 FROM " + tablePrefix + "uuid_cache WHERE mID = " + player.getUniqueId() + ";");
+        if (getType().equals(DBType.H2) || getType().equals(DBType.POSTGRESQL)) {
+            sql = "SELECT 1 FROM " +
+                    tablePrefix + "uuid_cache " +
+                    "WHERE mID = " + player.getUniqueId() + ";";
+        } else {
+            sql = "SELECT 1 FROM " +
+                    tablePrefix + "uuid_cache " +
+                    "WHERE mID = '" + player.getUniqueId().toString() + "';";
+        }
+        ResultSet rs = statement.executeQuery(sql);
         return rs.next();
     }
 
@@ -239,10 +249,14 @@ public class Database {
         String cacheSql;
         if (getType().equals(DBType.H2) || getType().equals(DBType.POSTGRESQL)) {
             cacheSql = "INSERT INTO " +
-                    tablePrefix + "uuid_cache (mID,uName,uLastLogin) VALUES(" + player.getUniqueId() + ",'" + player.getName() + "'," + new Timestamp(System.currentTimeMillis()) + ");";
+                    tablePrefix + "uuid_cache " +
+                    "(mID,uName,uLastLogin) " +
+                    "VALUES(" + player.getUniqueId() + ",'" + player.getName() + "'," + new Timestamp(System.currentTimeMillis()) + ");";
         } else {
             cacheSql = "INSERT INTO " +
-                    tablePrefix + "uuid_cache (mID,uName,uLastLogin) VALUES('" + player.getUniqueId().toString() + "','" + player.getName() + "'," + new Timestamp(System.currentTimeMillis()) + ");";
+                    tablePrefix + "uuid_cache " +
+                    "(mID,uName,uLastLogin) " +
+                    "VALUES('" + player.getUniqueId().toString() + "','" + player.getName() + "'," + new Timestamp(System.currentTimeMillis()) + ");";
         }
 
         Statement statement = getConnection().createStatement();
@@ -256,9 +270,19 @@ public class Database {
     }
 
     public int getId(Player player) throws SQLException {
+        String sql;
         Statement statement = getConnection().createStatement();
-        ResultSet rs = statement.executeQuery("SELECT 1 FROM " + tablePrefix + "uuid_cache WHERE mID = " + player.getUniqueId() + ";");
-        return rs.getInt("mID");
+        if (getType().equals(DBType.H2) || getType().equals(DBType.POSTGRESQL)) {
+            sql = "SELECT 1 FROM " +
+                    tablePrefix + "uuid_cache " +
+                    "WHERE mID = " + player.getUniqueId() + ";";
+        } else {
+            sql = "SELECT 1 FROM " +
+                    tablePrefix + "uuid_cache " +
+                    "WHERE mID = '" + player.getUniqueId().toString() + "';";
+        }
+        ResultSet rs = statement.executeQuery(sql);
+        return rs.getInt("uID");
     }
 
     public PlayerManager createPlayerManager(Player player, boolean exists) throws SQLException {
