@@ -13,16 +13,16 @@ package io.github.jagswag2014.events;
 
 import io.github.jagswag2014.Jssentials;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 
-public class PlayerJoin extends ZEventParent {
+public class PlayerPreLogin extends ZEventParent {
 
-    public PlayerJoin(Jssentials plugin) {
+    public PlayerPreLogin(Jssentials plugin) {
         super(plugin);
     }
 
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
+    public void onPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
 
     }
 }

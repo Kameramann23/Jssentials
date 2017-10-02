@@ -47,7 +47,7 @@ public class PlayerManager {
         this.id = id;
         this.player = player;
         homes = new ArrayList<>();
-        lastLocation = setLastLocation(player);
+        setLastLocation(player);
         lastReply = null;
         ignores = new ArrayList<>();
         receiveMsg = true;
@@ -57,7 +57,7 @@ public class PlayerManager {
         frozen = false;
         banned = false;
         bannedExpiration = 0;
-        plugin.playerManagerHashMap.put(player, this);
+        this.plugin.playerManagerHashMap.put(player, this);
     }
 
     /**
@@ -95,15 +95,6 @@ public class PlayerManager {
         this.banned = banned;
         this.bannedExpiration = bannedExpiration;
         plugin.playerManagerHashMap.put(player, this);
-    }
-
-    private String setLastLocation(Player player) {
-        return player.getLocation().getWorld().getName() + ":"
-                + player.getLocation().getBlockX() + ":"
-                + player.getLocation().getBlockY() + ":"
-                + player.getLocation().getBlockZ() + ":"
-                + player.getLocation().getYaw() + ":"
-                + player.getLocation().getPitch();
     }
 
     /**
@@ -167,6 +158,20 @@ public class PlayerManager {
      */
     public void removeHome(String oldHome) {
         getHomes().remove(oldHome);
+    }
+
+    /**
+     * Sets the last location of the player after a teleport
+     *
+     * @param player player to set last location for
+     */
+    public void setLastLocation(Player player) {
+        lastLocation = player.getLocation().getWorld().getName() + ":"
+                + player.getLocation().getBlockX() + ":"
+                + player.getLocation().getBlockY() + ":"
+                + player.getLocation().getBlockZ() + ":"
+                + player.getLocation().getYaw() + ":"
+                + player.getLocation().getPitch();
     }
 
     /**

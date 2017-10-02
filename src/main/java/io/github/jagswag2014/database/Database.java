@@ -117,6 +117,8 @@ public class Database {
                     queries.add("CREATE TABLE IF NOT EXISTS " +
                             tablePrefix + "uuid_cache (uID IDENTITY PRIMARY KEY, mID UUID NOT NULL UNIQUE, uName VARCHAR(16) NOT NULL, uLastLogin TIMESTAMP NOT NULL);");
                     queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "2fa (uID INTEGER NOT NULL, secret_key TEXT NOT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
                             tablePrefix + "user (uID INTEGER NOT NULL, uHomes TEXT NULL, uLastLocation TEXT DEFAULT NULL, uIgnores TEXT DEFAULT NULL, uMessage BOOLEAN DEFAULT FALSE, uTeleport BOOLEAN DEFAULT FALSE);");
                     queries.add("CREATE TABLE IF NOT EXISTS " +
                             tablePrefix + "flags (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
@@ -142,6 +144,8 @@ public class Database {
                 case MYSQL:
                     queries.add("CREATE TABLE IF NOT EXISTS " +
                             tablePrefix + "uuid_cache (uID INTEGER AUTO_INCREMENT PRIMARY KEY UNIQUE, mID VARCHAR(36) NOT NULL UNIQUE, uName VARCHAR(16) NOT NULL, uLastLogin TIMESTAMP NOT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "2fa (uID INTEGER NOT NULL, secret_key TEXT NOT NULL");
                     queries.add("CREATE TABLE IF NOT EXISTS " +
                             tablePrefix + "user (uID INTEGER NOT NULL, uHomes TEXT NULL, uLastLocation TEXT DEFAULT NULL, uIgnores TEXT DEFAULT NULL, uMessage BOOLEAN DEFAULT FALSE, uTeleport BOOLEAN DEFAULT FALSE);");
                     queries.add("CREATE TABLE IF NOT EXISTS " +
@@ -169,6 +173,8 @@ public class Database {
                     queries.add("CREATE TABLE IF NOT EXISTS " +
                             tablePrefix + "uuid_cache (uID INTEGER AUTO_INCREMENT PRIMARY KEY UNIQUE, mID VARCHAR(36) NOT NULL UNIQUE, uName VARCHAR(16) NOT NULL, uLastLogin TIMESTAMP NOT NULL);");
                     queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "2fa (uID INTEGER NOT NULL, secret_key TEXT NOT NULL");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
                             tablePrefix + "user (uID INTEGER NOT NULL, uHomes TEXT NULL, uLastLocation TEXT DEFAULT NULL, uIgnores TEXT DEFAULT NULL, uMessage BOOLEAN DEFAULT FALSE, uTeleport BOOLEAN DEFAULT FALSE);");
                     queries.add("CREATE TABLE IF NOT EXISTS " +
                             tablePrefix + "flags (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
@@ -195,6 +201,8 @@ public class Database {
                     queries.add("CREATE TABLE IF NOT EXISTS " +
                             tablePrefix + "uuid_cache (uID INTEGER SERIAL PRIMARY KEY UNIQUE, mID UUID NOT NULL UNIQUE, uName VARCHAR(16) NOT NULL, uLastLogin TIMESTAMP NOT NULL);");
                     queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "2fa (uID INTEGER NOT NULL, secret_key TEXT NOT NULL");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
                             tablePrefix + "user (uID INTEGER NOT NULL, uHomes TEXT NULL, uLastLocation TEXT DEFAULT NULL, uIgnores TEXT DEFAULT NULL, uMessage BOOLEAN DEFAULT FALSE, uTeleport BOOLEAN DEFAULT FALSE);");
                     queries.add("CREATE TABLE IF NOT EXISTS " +
                             tablePrefix + "flags (uSender INTEGER NOT NULL, uTime TIMESTAMP NOT NULL, uTarget VARCHAR(16) NOT NULL, uReason TEXT DEFAULT NULL);");
@@ -220,6 +228,8 @@ public class Database {
                 default:
                     queries.add("CREATE TABLE IF NOT EXISTS " +
                             tablePrefix + "uuid_cache (uID INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, mID VARCHAR(36) NOT NULL UNIQUE, uName VARCHAR(16) NOT NULL, uLastLogin TIMESTAMP NOT NULL);");
+                    queries.add("CREATE TABLE IF NOT EXISTS " +
+                            tablePrefix + "2fa (uID INTEGER NOT NULL, secret_key TEXT NOT NULL");
                     queries.add("CREATE TABLE IF NOT EXISTS " +
                             tablePrefix + "user (uID INTEGER NOT NULL, uHomes TEXT NULL, uLastLocation TEXT DEFAULT NULL, uIgnores TEXT DEFAULT NULL, uMessage BOOLEAN DEFAULT FALSE, uTeleport BOOLEAN DEFAULT FALSE);");
                     queries.add("CREATE TABLE IF NOT EXISTS " +

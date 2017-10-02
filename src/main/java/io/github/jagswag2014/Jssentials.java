@@ -13,6 +13,8 @@ package io.github.jagswag2014;
 
 import io.github.jagswag2014.configuration.SettingsManager;
 import io.github.jagswag2014.database.Database;
+import io.github.jagswag2014.events.PlayerPreLogin;
+import io.github.jagswag2014.events.PlayerQuit;
 import io.github.jagswag2014.utils.PlayerManager;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.entity.Player;
@@ -66,7 +68,8 @@ public final class Jssentials extends JavaPlugin {
      */
     private void setupEvents() {
         PluginManager pm = getServer().getPluginManager();
-
+        pm.registerEvents(new PlayerPreLogin(this), this);
+        pm.registerEvents(new PlayerQuit(this), this);
     }
 
     /**
