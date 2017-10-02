@@ -40,13 +40,18 @@
               <artifactSet>
                 <includes>
                   <include>org.bstats:*</include>
+                    <include>com.warrenstrange:*</include>
                 </includes>
               </artifactSet>
               <relocations>
                 <relocation>
                   <pattern>org.bstats</pattern>
-                  <shadedPattern>io.github.jagswag2014.jssentials.utils</shadedPattern>
+                    <shadedPattern>io.github.jagswag2014.jssentials.utils</shadedPattern>
                 </relocation>
+                  <relocation>
+                      <pattern>com.warrenstrange</pattern>
+                      <shadedPattern>io.github.jagswag2014.jssentials.utils</shadedPattern>
+                  </relocation>
               </relocations>
             </configuration>
           </execution>
