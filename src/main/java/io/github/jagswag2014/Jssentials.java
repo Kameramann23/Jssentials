@@ -11,6 +11,7 @@
 
 package io.github.jagswag2014;
 
+import io.github.jagswag2014.commands.CommandChangeTime;
 import io.github.jagswag2014.configuration.SettingsManager;
 import io.github.jagswag2014.database.Database;
 import io.github.jagswag2014.events.PlayerPreLogin;
@@ -60,7 +61,7 @@ public final class Jssentials extends JavaPlugin {
      * Register all commands
      */
     private void setupCommands() {
-
+        getCommand("time").setExecutor(new CommandChangeTime());
     }
 
     /**

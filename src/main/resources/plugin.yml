@@ -4,3 +4,6 @@ main: io.github.jagswag2014.Jssentials
 authors: [JagSwag2014]
 website: http://www.jagswag2014.me/
 softdepend: [PlaceHolderAPI,Vault]
+commands:
+ time:
+  description: Changes time in a specific world.
